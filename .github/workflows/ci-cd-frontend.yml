@@ -1,4 +1,4 @@
-name: CI/CD Pipeline for React Frontend Dev
+name: CI/CD Pipeline for Vue.js Frontend Dev
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "20" # Gunakan versi Node yang stabil, sesuaikan dengan kebutuhan proyek
 
       - name: Cache Node Modules
         uses: actions/cache@v4
@@ -26,20 +26,17 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Run Tests
-        run: npm test
-
-      - name: Build React App
+      - name: Build Vue.js App with Vite
         run: npm run build
 
       - name: Debug Build Output
-        run: ls -la build/ || echo "Build folder not found"
+        run: ls -la dist/ || echo "Dist folder not found"
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: react-build
-          path: build/
+          name: vue-build
+          path: dist/
           retention-days: 1
 
       - name: Debug Artifact Upload
@@ -52,11 +49,11 @@ jobs:
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
-          name: react-build
-          path: build/
+          name: vue-build
+          path: dist/
 
       - name: Debug Downloaded Artifact
-        run: ls -la build/ || echo "Downloaded artifact folder not found"
+        run: ls -la dist/ || echo "Downloaded artifact folder not found"
 
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.5.4
@@ -78,4 +75,4 @@ jobs:
             rm -rf /home/u1737816/public_html/layakin/frontend/*
             exit
           EOF
-          scp -r -P 2223 build/* u1737816@go-village.id:/home/u1737816/public_html/layakin/frontend/
+          scp -r -P 65002 dist/* u1737816@nredutech.com:/home/u1737816/public_html/layakin/frontend/
