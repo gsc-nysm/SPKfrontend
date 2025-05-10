@@ -1,125 +1,88 @@
 <template>
-    <el-dialog
-        v-model="visible"
-        :title="`Kelola Pembobotan ` + tipe"
-        width="800"
-        :top=" step === 'table' ? '5vh' : '10vh' "
-        :before-close="handleClose"
-    >
-    <div v-if="step === 'table'">
-        <!-- Tabel matriks perbandingan untuk tampilan saja -->
-        <el-table
-            :data="criteria"
-            style="width: 100%"
-            :stripe="true"
-            :show-header="true"
-            v-if="criteria.length && matrix.length"
-        >
-            <el-table-column
-                prop="nama_kriteria"
-                label="Kriteria"
-                width="150"
-            >
-            <template #default="scope">
-                {{ scope.row.nama_kriteria ?? scope.row.nama_sub_kriteria  }}
-            </template>
-            </el-table-column>
-            <el-table-column
-                v-for="(criterion, colIndex) in criteria"
-                :key="colIndex"
-                :label="criterion.nama_kriteria ?? criterion.nama_sub_kriteria"
-                :prop="`col${colIndex}`"
-                :width="'auto'"
-            >
-            <template #default="scope">
-                <span>{{ getDisplayValue(scope.row.index, colIndex) }}</span>
-            </template>
-            </el-table-column>
-        </el-table>
-        <p v-else class="text-center text-gray-500">Tidak ada data kriteria untuk dibobot.</p>
-
-        <!-- Tombol untuk memulai perbandingan ulang -->
-        <div class="mt-4 text-center">
-            <el-button
-                type="primary"
-                class="mr-2"
-                @click="handleStartComparison"
-                :disabled="!(props.data && props.data.length)"
-            >
-            Mulai Perbandingan Ulang
-            </el-button>
-            <el-button
-                plain
-                type="primary"
-                @click="handleUpdateBobot"
-                v-if="weights.length && isComparisonComplete"
-            >
-            Perbarui Bobot {{ tipe }}
-            </el-button>
-        </div>
-
-        <!-- Tampilkan hasil bobot (opsional) -->
-        <div v-if="weights.length && isComparisonComplete" class="mt-4">
-            <h3 class="text-lg font-semibold">Hasil Bobot:</h3>
-            <el-table :data="criteria" style="width: 100%">
-                <template v-if="tipe === 'kriteria'">
-                    <el-table-column prop="nama_kriteria" label="Kriteria" />
-                </template>                
-                <el-table-column v-else prop="nama_sub_kriteria" label="Sub Kriteria" />
-                <el-table-column label="Bobot">
+    <el-dialog v-model="visible" :title="`Kelola Pembobotan ` + tipe" width="800"
+        :top="step === 'table' ? '5vh' : '10vh'" :before-close="handleClose">
+        <div v-if="step === 'table'">
+            <!-- Tabel matriks perbandingan untuk tampilan saja -->
+            <el-table :data="criteria" style="width: 100%" :stripe="true" :show-header="true"
+                v-if="criteria.length && matrix.length">
+                <el-table-column prop="nama_kriteria" label="Kriteria" width="150">
                     <template #default="scope">
-                    {{ weights[scope.$index].toFixed(3) }} ({{ (weights[scope.$index] * 100).toFixed(1) }}%)
+                        {{ scope.row.nama_kriteria ?? scope.row.nama_sub_kriteria }}
+                    </template>
+                </el-table-column>
+                <el-table-column v-for="(criterion, colIndex) in criteria" :key="colIndex"
+                    :label="criterion.nama_kriteria ?? criterion.nama_sub_kriteria" :prop="`col${colIndex}`"
+                    :width="'auto'">
+                    <template #default="scope">
+                        <span>{{ getDisplayValue(scope.row.index, colIndex) }}</span>
                     </template>
                 </el-table-column>
             </el-table>
-        </div>
+            <p v-else class="text-center text-gray-500">Tidak ada data kriteria untuk dibobot.</p>
 
-        <div v-if="consistencyIndex.ci !== null" class="mt-4">
-            <h3 class="text-lg font-semibold">Konsistensi Index:</h3>            
-            <el-table :data="[consistencyIndex]" style="width: 100%">
-                <el-table-column prop="lambdaMax" label="Lambda Max" width="150" />
-                <el-table-column prop="ci" label="Consistency Index (CI)" />
-                <el-table-column prop="cr" label="Consistency Ratio (CR)" />
-                <el-table-column label="Status Konsistensi">
-                    <template #default="scope">
-                        <span :class="{ 'text-green-500': scope.row.isConsistent, 'text-red-500': !scope.row.isConsistent }">
-                            {{ scope.row.isConsistent ? 'Konsisten (CR < 0.1)' : 'Tidak Konsisten (CR ≥ 0.1)' }}
-                        </span>
+            <!-- Tombol untuk memulai perbandingan ulang -->
+            <div class="mt-4 text-center">
+                <el-button type="primary" class="mr-2" @click="handleStartComparison"
+                    :disabled="!(props.data && props.data.length)">
+                    Mulai Perbandingan Ulang
+                </el-button>
+                <el-button plain type="primary" @click="handleUpdateBobot"
+                    v-if="weights.length && isComparisonComplete">
+                    Perbarui Bobot {{ tipe }}
+                </el-button>
+            </div>
+
+            <!-- Tampilkan hasil bobot (opsional) -->
+            <div v-if="weights.length && isComparisonComplete" class="mt-4">
+                <h3 class="text-lg font-semibold">Hasil Bobot:</h3>
+                <el-table :data="criteria" style="width: 100%">
+                    <template v-if="tipe === 'kriteria'">
+                        <el-table-column prop="nama_kriteria" label="Kriteria" />
                     </template>
-                </el-table-column>
-            </el-table>
+                    <el-table-column v-else prop="nama_sub_kriteria" label="Sub Kriteria" />
+                    <el-table-column label="Bobot">
+                        <template #default="scope">
+                            {{ weights[scope.$index].toFixed(3) }} ({{ (weights[scope.$index] * 100).toFixed(1) }}%)
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
+
+            <div v-if="consistencyIndex.ci !== null" class="mt-4">
+                <h3 class="text-lg font-semibold">Konsistensi Index:</h3>
+                <el-table :data="[consistencyIndex]" style="width: 100%">
+                    <el-table-column prop="lambdaMax" label="Lambda Max" width="150" />
+                    <el-table-column prop="ci" label="Consistency Index (CI)" />
+                    <el-table-column prop="cr" label="Consistency Ratio (CR)" />
+                    <el-table-column label="Status Konsistensi">
+                        <template #default="scope">
+                            <span
+                                :class="{ 'text-green-500': scope.row.isConsistent, 'text-red-500': !scope.row.isConsistent }">
+                                {{ scope.row.isConsistent ? 'Konsisten (CR < 0.1)' : 'Tidak Konsisten (CR ≥ 0.1)' }}
+                                    </span>
+                        </template>
+                    </el-table-column>
+                </el-table>
+            </div>
         </div>
-    </div>
 
         <div v-if="step === 'comparison'">
             <!-- Tampilan perbandingan berpasangan -->
             <div v-if="currentPair" class="text-center">
                 <h3 class="text-lg">
-                    Apakah <span class="font-semibold">{{ currentPair.criteria1 }}</span> lebih penting dari <span class="font-semibold">{{ currentPair.criteria2 }}</span> ?
+                    Apakah <span class="font-semibold">{{ currentPair.criteria1 }}</span> lebih penting dari <span
+                        class="font-semibold">{{ currentPair.criteria2 }}</span> ?
                 </h3>
-                <el-select
-                    v-model="currentScore"
-                    placeholder="Pilih Skor"
-                    class="mt-4"
-                    style="width: 500px"
-                    @change="saveComparison"
-                >
-                    <el-option
-                        v-for="score in ahpScale"
-                        :key="score.value"
-                        :label="`${score.value.toFixed(2)} - ${score.label}`"
-                        :value="score.value"
-                    />
+                <el-select v-model="currentScore" placeholder="Pilih Skor" class="mt-4" style="width: 500px"
+                    @change="saveComparison">
+                    <el-option v-for="score in ahpScale" :key="score.value"
+                        :label="`${score.value.toFixed(2)} - ${score.label}`" :value="score.value" />
                 </el-select>
                 <div class="mt-4 flex justify-between">
                     <el-button @click="previousPair" :disabled="currentPairIndex === 0">
                         Sebelumnya
                     </el-button>
-                    <el-button
-                        type="primary"
-                        @click="nextPair"
-                        v-if="currentPairIndex < pairs.length - 1"
-                    >
+                    <el-button type="primary" @click="nextPair" v-if="currentPairIndex < pairs.length - 1">
                         Lanjut
                     </el-button>
                     <el-button type="primary" v-else @click="finishComparison" :disabled="loading">
@@ -131,12 +94,7 @@
         </div>
     </el-dialog>
 
-    <el-dialog
-        v-model="confirmResetVisible"
-        title="Konfirmasi Reset"
-        width="400"
-        append-to-body
-    >
+    <el-dialog v-model="confirmResetVisible" title="Konfirmasi Reset" width="400" append-to-body>
         <p>Apakah Anda yakin ingin mereset semua data perbandingan? Data sebelumnya akan dihapus.</p>
         <template #footer>
             <span class="dialog-footer">
@@ -148,12 +106,7 @@
         </template>
     </el-dialog>
 
-    <el-dialog
-        v-model="confirmUpdateVisible"
-        :title="`Konfirmasi Perbarui Bobot ${tipe}`"
-        width="400"
-        append-to-body
-    >
+    <el-dialog v-model="confirmUpdateVisible" :title="`Konfirmasi Perbarui Bobot ${tipe}`" width="400" append-to-body>
         <p>Apakah Anda yakin ingin memperbarui bobot {{ tipe }} ? Data sebelumnya akan dihapus.</p>
         <template #footer>
             <span class="dialog-footer">
@@ -200,22 +153,22 @@ const ahpScale = [
         label: 'Sama penting',
     },
     {
-        value: 1/3,
+        value: 1 / 3,
         label: 'Sedikit Kurang Penting',
     },
     {
-        value: 1/5,
+        value: 1 / 5,
         label: 'Lebih Kurang Penting',
     },
     {
-        value: 1/7,
+        value: 1 / 7,
         label: 'Jauh Kurang Pentingg',
     },
     {
-        value: 1/9,
+        value: 1 / 9,
         label: 'Mutlak Kurang Penting',
     },
-    
+
     {
         value: 3,
         label: 'Sebanding penting',
@@ -307,7 +260,7 @@ const handleStartComparison = () => {
         confirmResetVisible.value = true; // Tampilkan dialog konfirmasi jika data lengkap
     } else {
         startComparison(); // Langsung mulai jika data belum lengkap
-    }    
+    }
 };
 
 const handleUpdateBobot = () => {
@@ -337,14 +290,14 @@ const initializeMatrix = () => {
     for (let i = 0; i < props.data.length; i++) {
         matrix.value[i][i] = 1; // Diagonal utama = 1
         const comparisons = props.data[i].pair_wise_comparison || [];
-        
+
         for (let j = 0; j < props.data.length; j++) {
             if (i !== j) {
                 // Cari perbandingan untuk pasangan kriteria i dan j
                 const comparison = comparisons.find(
-                (pc: any) =>
-                    (props.data && pc.kriteria_1_id === props.data[i].id && pc.kriteria_2_id === props.data[j].id) ||
-                    (props.data && pc.kriteria_1_id === props.data[j].id && pc.kriteria_2_id === props.data[i].id)
+                    (pc: any) =>
+                        (props.data && pc.kriteria_1_id === props.data[i].id && pc.kriteria_2_id === props.data[j].id) ||
+                        (props.data && pc.kriteria_1_id === props.data[j].id && pc.kriteria_2_id === props.data[i].id)
                 );
                 if (comparison) {
                     if (comparison.kriteria_1_id === props.data[i].id) {
@@ -358,14 +311,14 @@ const initializeMatrix = () => {
             }
         }
     }
-    
+
     console.log(props.data);
-    
-  // Generate pasangan untuk perbandingan
+
+    // Generate pasangan untuk perbandingan
     pairs.value = [];
-    if(props.tipe === 'kriteria') {
+    if (props.tipe === 'kriteria') {
         console.log(props.tipe);
-        
+
         for (let i = 0; i < props.data.length; i++) {
             for (let j = i + 1; j < props.data.length; j++) {
                 pairs.value.push({
@@ -376,7 +329,7 @@ const initializeMatrix = () => {
                 });
             }
         }
-    }else {
+    } else {
         for (let i = 0; i < props.data.length; i++) {
             for (let j = i + 1; j < props.data.length; j++) {
                 pairs.value.push({
@@ -390,13 +343,13 @@ const initializeMatrix = () => {
 
     }
 
-    
+
 };
 
 // Tampilkan nilai di tabel
 const getDisplayValue = (rowIndex: number, colIndex: number): string => {
-    const value = matrix.value[rowIndex][colIndex];    
-    
+    const value = matrix.value[rowIndex][colIndex];
+
     return value === '-' ? '-' : value.toFixed(2).toString();
 };
 
@@ -419,23 +372,6 @@ const saveComparison = () => {
     }
 };
 
-
-const calculateConsistencyRatio = (): { cr: string; isConsistent: boolean } => {
-    const ci = consistencyIndex.value?.ci ? parseFloat(consistencyIndex.value.ci) : 0;
-    const n = matrix.value.length;
-
-    const riValues = [0, 0, 0.58, 0.90, 1.12, 1.24, 1.32, 1.41, 1.45, 1.49];
-    const ri = n <= riValues.length ? riValues[n] : 1.49;
-
-    const cr = ci !== 0 && ri !== 0 ? ci / ri : 0;
-
-    const isConsistent = cr < 0.1;
-
-    return {
-        cr: cr.toFixed(4),
-        isConsistent: isConsistent,
-    };
-};
 
 
 // Fungsi untuk menghitung Consistency Index
@@ -491,7 +427,7 @@ const confirmUpdate = async () => {
         loading.value = true;
         try {
             // Buat objek yang memetakan kriteria_id ke bobot
-            const updatedWeights : { [key: number]: number } = {};
+            const updatedWeights: { [key: number]: number } = {};
             criteria.value.forEach((criterion, index) => {
                 updatedWeights[criterion.id] = weights.value[index];
             });
@@ -544,9 +480,9 @@ const previousPair = () => {
         saveComparison();
         currentPairIndex.value--;
         currentScore.value =
-        matrix.value[pairs.value[currentPairIndex.value].index1][
+            matrix.value[pairs.value[currentPairIndex.value].index1][
             pairs.value[currentPairIndex.value].index2
-        ] || 1;
+            ] || 1;
     }
 };
 
@@ -555,14 +491,14 @@ const nextPair = () => {
         saveComparison();
         currentPairIndex.value++;
         currentScore.value =
-        matrix.value[pairs.value[currentPairIndex.value].index1][
+            matrix.value[pairs.value[currentPairIndex.value].index1][
             pairs.value[currentPairIndex.value].index2
-        ] || 1;
+            ] || 1;
     }
 };
 
 // Selesai perbandingan dan hitung bobot
-const finishComparison =  async () => {
+const finishComparison = async () => {
     saveComparison();
     calculateWeights();
     if (props.createService) {
@@ -575,14 +511,14 @@ const finishComparison =  async () => {
                     if (nilai !== '-') {
                         comparisonDataList.push({
                             kriteria_1_id: criteria.value[i].id,
-                            kriteria_2_id: criteria.value[j].id,                            
+                            kriteria_2_id: criteria.value[j].id,
                             nilai_perbandingan: nilai,
                             bantuan_sosial_id: router.currentRoute.value.params?.id as string,
                             tipe: props.tipe
                         });
                     }
                 }
-            }            
+            }
 
             // Kirim sebagai satu payload bulk
             await props.createService(comparisonDataList);
@@ -657,10 +593,10 @@ const handleClose = (done: () => void) => {
 };
 </script>
 
-<style  scoped>
+<style scoped>
 .dialog-footer {
-display: flex;
-justify-content: flex-end;
-gap: 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
 }
 </style>
