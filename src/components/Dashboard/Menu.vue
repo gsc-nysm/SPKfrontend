@@ -1,8 +1,8 @@
 <template>
-    <el-menu :collapse="isCollapse" router @select="handleSelect">
+    <el-menu :collapse="isCollapse" router @select="handleSelect" style="border-right: none;">
         <div class="logo p-6 flex justify-center">
             <a href="/" target="_blank" rel="noopener noreferrer">
-                <img src="@/assets/logo.png" width="100px" alt="">
+                <img src="../../assets/Logo.png" width="100px" alt="">
             </a>
         </div>
         <template v-if="auth?.role?.name === 'admin'">

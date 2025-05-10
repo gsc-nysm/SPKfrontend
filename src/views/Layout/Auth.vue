@@ -7,7 +7,7 @@
                     <router-link :to="{ name: 'homeview' }" class="flex items-center gap-2">
                         <el-button type="text" class="!p-0 !m-0 !border-none" :icon="ArrowLeft">
                         </el-button>
-                        <img src="@/assets/logo.png" alt="" width="100" />
+                        <img src="../../assets/Logo.png" alt="" width="100" />
                     </router-link>
                 </div>
                 <router-view></router-view>
