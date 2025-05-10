@@ -3,7 +3,7 @@
     <section class="text-black px-24 py-12">
         <div class="sm:grid-cols-3 grid gap-4 grid-cols-1">
             <div class="mb-6">
-                <img src="@/assets/logo.png" style="width: 200px" class="mb-4" alt="">
+                <img src="@/assets/Logo.png" style="width: 200px" class="mb-4" alt="">
                 <p>Platform untuk pengelolaan bantuan sosial yang lebih baik.</p>
             </div>
             <div class="text-right mb-6">
