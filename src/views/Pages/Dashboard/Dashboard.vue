@@ -1,6 +1,6 @@
 <template>
   <el-row :gutter="16">
-    <el-col :span="6" v-for="(assistance, index) in dashboardData" :key="index">
+    <el-col :xs="24" :sm="12" :md="8" :lg="6" class="mb-4" v-for="(assistance, index) in dashboardData" :key="index">
       <div class="statistic-card">
         <el-statistic :value="`${assistance} Data`" :loading="loading" :precision="0">
           <template #title>

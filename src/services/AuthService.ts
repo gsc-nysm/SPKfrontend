@@ -65,7 +65,7 @@ export const authService = {
     async logout(): Promise<void> {
         try {
             const authStore = useAuthStore()
-            await axiosInstance.post('/v1/auth/logout')
+            await axiosInstance.post('v1/auth/logout')
             authStore.logout()
         } catch (error) {
             throw error instanceof Error ? error : new Error('Terjadi kesalahan tidak terduga.')
