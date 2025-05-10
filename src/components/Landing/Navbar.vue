@@ -3,7 +3,7 @@
         <div class="grid grid-cols-2 items-center sm:p-4 px-4 lg:py-0 lg:px-24 sm:px-4 p-0 w-full">
             <div>
                 <div class="logo">
-                    <img src="@/assets/logo.png" alt="Layak-in Logo" class="w-24">
+                    <img src="../../assets/Logo.png" alt="Layak-in Logo" class="w-24">
                 </div>
             </div>
             <div>
