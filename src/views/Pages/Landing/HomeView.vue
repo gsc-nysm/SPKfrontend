@@ -9,8 +9,8 @@
     <!-- Fitur Utama -->
     <section class="features-section px-24 py-16">
       <h2 class="section-title">Fitur Unggulan</h2>
-      <el-row class="" :gutter="30">
-        <el-col :span="8" v-for="(feature, index) in features" :key="index">
+      <el-row class="lg:grid lg:grid-cols-3 lg:gap-8" :gutter="30">
+        <el-col :span="24" v-for="(feature, index) in features" :key="index">
           <el-card shadow="hover" class="feature-card">
             <h3>{{ feature.title }}</h3>
             <p>{{ feature.description }}</p>
@@ -20,11 +20,11 @@
     </section>
 
     <!-- Testimonial -->
-    <section class="testimonial-section px-24 py-16">
+    <section class="testimonial-section px-4 py-16 md:px-24">
       <h2 class="section-title">Apa Kata Pengguna Kami</h2>
-      <el-carousel :interval="5000" type="card" height="250px">
+      <el-carousel :interval="5000" type="card" class="md:h-[200px] h-full">
         <el-carousel-item v-for="(testimonial, index) in testimonials" :key="index">
-          <el-card class="testimonial-card">
+          <el-card class="testimonial-card w-full">
             <p class="testimonial-text">{{ testimonial.text }}</p>
             <p class="testimonial-author">{{ testimonial.author }}</p>
           </el-card>

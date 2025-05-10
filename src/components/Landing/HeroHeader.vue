@@ -2,7 +2,7 @@
     <section class="hero-section">
         <el-row :gutter="40" class="px-24" type="flex" align="middle">
             <el-col :span="24" class="text-center">
-                <h1 class="hero-title">Optimalkan Bantuan Sosial dengan Layak-in</h1>
+                <h1 class="hero-title">Optimalkan Bantuan Sosial dengan Layak-in Yasdil Lasoma</h1>
                 <p class="hero-subtitle">
                     Platform terpercaya untuk mengelola bantuan sosial secara transparan, efisien, dan adil.
                 </p>

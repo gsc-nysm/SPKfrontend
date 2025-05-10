@@ -1,13 +1,14 @@
 <template>
-    <el-header class="header">
-        <el-row :gutter="20" class="px-24" type="flex" align="middle">
-            <el-col :span="6">
+    <div class="header">
+        <div class="grid grid-cols-2 items-center sm:p-4 px-4 lg:py-0 lg:px-24 sm:px-4 p-0 w-full">
+            <div>
                 <div class="logo">
                     <img src="@/assets/logo.png" alt="Layak-in Logo" class="w-24">
                 </div>
-            </el-col>
-            <el-col :span="18">
-                <el-menu :default-active="activeMenu" mode="horizontal" class="flex justify-end">
+            </div>
+            <div>
+                <el-menu :default-active="activeMenu" mode="horizontal"
+                    class="border-bottom-none w-full flex justify-end">
                     <el-menu-item index="1">Beranda</el-menu-item>
                     <el-menu-item index="2">Fitur</el-menu-item>
                     <el-menu-item index="3">Testimonial</el-menu-item>
@@ -17,9 +18,9 @@
                             'Dashboard' : 'Masuk' }}</el-button>
                     </el-menu-item>
                 </el-menu>
-            </el-col>
-        </el-row>
-    </el-header>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup>
@@ -61,15 +62,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Header */
-.header {
-    background-color: #fff;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-}
-
 .logo {
     display: flex;
     align-items: center;
@@ -79,5 +71,10 @@ onMounted(() => {
     font-size: 1.5em;
     font-weight: bold;
     color: #333;
+}
+
+.el-menu--horizontal.el-menu {
+    background-color: transparent;
+    border: none;
 }
 </style>

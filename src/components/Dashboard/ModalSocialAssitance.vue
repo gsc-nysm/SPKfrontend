@@ -1,10 +1,10 @@
 <template>
     <div>
-        <el-dialog v-model="visible" title="Program Bantuan Sosial" width="650" :show-close="false">
+        <el-dialog v-model="visible" title="Program Bantuan Sosial" class="sm:w-1/3 w-full" :show-close="false">
             <el-button plain icon="Plus" class="w-full my-4" @click="openCrudModal('create', null)">Tambah Program
                 Bantuan</el-button>
             <el-row :gutter="16" v-if="social_assistance.length > 0">
-                <el-col :span="8" v-for="item in social_assistance" :key="item.id">
+                <el-col :xs="24" :sm="12" :md="12" :lg="12" v-for="item in social_assistance" :key="item.id">
                     <el-card class="statistic-card border my-4" shadow="never"
                         :class="programActive === item.id ? 'bg-primary-50' : ''" @click="handleSelect(item)">
                         <div class="statistic-header">
