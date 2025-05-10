@@ -86,7 +86,7 @@ jobs:
             rm -rf /home/u1737816/public_html/layakin/frontend/*
             exit
           EOF
-          scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P 65002 dist/* u1737816@nredutech.com:/home/u1737816/public_html/layakin/frontend/
+          scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r -P 65002 dist/* u1737816@nredutech.com:/home/u1737816/public_html/layakin/frontend/
 
       - name: Debug Deployment
         run: echo "Deployment completed successfully" || echo "Deployment failed"
