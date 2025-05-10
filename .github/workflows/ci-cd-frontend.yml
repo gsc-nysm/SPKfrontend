@@ -27,10 +27,10 @@ jobs:
         run: npm install
 
       - name: Build Vue.js App with Vite
-        run: npm run build
+        run: VITE_API_URL=${{ secrets.VITE_API_URL }} VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }} npm run build
         env:
-          VITE_API_URL: ${{ secrets.VITE_API_URL }}
-          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          echo "Secret VITE_API_URL: ${{ secrets.VITE_API_URL }}"
+          echo "Secret VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}"
 
       - name: Debug Environment Variables
         run: |
