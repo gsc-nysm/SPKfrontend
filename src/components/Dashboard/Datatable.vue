@@ -40,7 +40,7 @@
                     </el-table-column>
 
                     <!-- Slot untuk Aksi -->
-                    <el-table-column label="Aksi" width="150">
+                    <el-table-column label="Aksi" width="auto">
                         <template #default="scope">
                             <div class="flex lg:flex-row flex-col items-center justify-around">
                                 <slot name="actions" :row="scope.row" />
