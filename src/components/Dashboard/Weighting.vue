@@ -429,7 +429,7 @@ const confirmUpdate = async () => {
             // Buat objek yang memetakan kriteria_id ke bobot
             const updatedWeights: { [key: number]: number } = {};
             criteria.value.forEach((criterion, index) => {
-                updatedWeights[criterion.id] = weights.value[index];
+                updatedWeights[criterion.id] = Number(weights.value[index].toFixed(3));
             });
 
             // Panggil updateService dengan payload yang mencakup bantuan_id dan weights

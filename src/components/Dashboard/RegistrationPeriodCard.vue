@@ -4,11 +4,8 @@
         <div class="flex flex-col md:flex-row gap-4 items-center">
             <!-- Logo Instansi -->
             <div class="flex-shrink-0">
-                <img
-                    :src="url + periode.bantuan_sosial_id.instansi.logo"
-                    alt="Logo Instansi"
-                    class="w-16 h-16 object-contain rounded-full border border-gray-200"                    
-                />
+                <img :src="url + periode.bantuan_sosial_id.instansi.logo" alt="Logo Instansi"
+                    class="w-16 h-16 object-contain rounded-full border border-gray-200" />
             </div>
 
             <!-- Informasi Utama -->
@@ -20,13 +17,9 @@
                         </h3>
                         <p class="text-sm text-gray-600">
                             {{ periode.bantuan_sosial_id.instansi.nama_instansi }}
-                        </p>                        
+                        </p>
                     </div>
-                    <el-tag
-                        :type="periode.status === 'aktif' ? 'success' : 'danger'"
-                        size="small"
-                        class="mt-1"
-                    >
+                    <el-tag :type="periode.status === 'aktif' ? 'success' : 'danger'" size="small" class="mt-1">
                         {{ periode.status }}
                     </el-tag>
                 </div>
@@ -35,41 +28,33 @@
                 <div class="mt-2 flex flex-col sm:flex-row sm:gap-4 text-sm text-gray-600">
                     <div>
                         <span>Dibuka </span>
-                        <span class="font-semibold">{{ formatDate(periode.tanggal_mulai) }}</span> 
-                        - 
+                        <span class="font-semibold">{{ formatDate(periode.tanggal_mulai) }}</span>
+                        -
                         <span class="font-semibold">{{ formatDate(periode.tanggal_selesai) }}</span>
-                    </div>                    
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Tombol Aksi -->
         <div class="mt-4 flex justify-center items-center">
-            <el-button
+            <!-- <el-button
                 plain
                 type="primary"
                 class="w-full"                
                 @click="handleRegister"
             >
                 Informasi Bantuan
-            </el-button>
-            <el-button
-                type="primary"
-                class="w-full"
-                :disabled="periode.status !== 'aktif'"
-                @click="handleRegister"
-            >
-                Daftar Pengajuan
+            </el-button> -->
+            <el-button type="primary" class="w-full" :disabled="periode.status !== 'aktif'" @click="handleRegister">
+                Ajukan Permohonan Bantuan!
             </el-button>
         </div>
     </el-card>
-    <el-dialog
-        v-model="confirmRegistrationVisible"
-        :title="`Konfirmasi Pengajuan ${periode.bantuan_sosial_id.nama_bantuan_sosial}`"
-        width="400"
-        append-to-body
-    >
-        <p>Apakah anda yakin untuk mendaftar pada bantuan sosial {{periode.bantuan_sosial_id.nama_bantuan_sosial}} ?</p>
+    <el-dialog v-model="confirmRegistrationVisible"
+        :title="`Konfirmasi Pengajuan ${periode.bantuan_sosial_id.nama_bantuan_sosial}`" width="400" append-to-body>
+        <p>Apakah anda yakin untuk mendaftar pada bantuan sosial {{ periode.bantuan_sosial_id.nama_bantuan_sosial }} ?
+        </p>
         <template #footer>
             <span class="dialog-footer">
                 <el-button class="mr-2" @click="confirmRegistrationVisible = false">Batal</el-button>
@@ -116,7 +101,7 @@ const handleRegister = () => {
 
 const confirmRegistration = () => {
     loading.value = true
-    if(props.createService) {
+    if (props.createService) {
         props.createService({
             periode_pendaftaran_id: props.periode.id
         }).then((response) => {
@@ -125,14 +110,14 @@ const confirmRegistration = () => {
             console.log(error);
         }).finally(() => {
             loading.value = false
-        })            
+        })
     }
     confirmRegistrationVisible.value = false;
     loading.value = false
 };
 </script>
 
-<style  scoped>
+<style scoped>
 .registration-card {
     margin-bottom: 16px;
     border-radius: 8px;

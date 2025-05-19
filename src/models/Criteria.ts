@@ -12,6 +12,7 @@ export interface IncomingApiData {
     }
     bobot: number
     urutan: number
+    deskripsi: string
     perlu_bukti_pendukung: string
     sub_kriteria_bantuan?: {
         id: number
@@ -34,6 +35,7 @@ export interface OutgoingApiData {
     kode_kriteria: string
     nama_kriteria: string
     tipe: string
+    deskripsi: string
     perlu_bukti_pendukung: string
     bantuan_sosial_id: number    
 }
@@ -43,6 +45,7 @@ export interface FormValue {
     kode_kriteria: string
     nama_kriteria: string
     tipe: string
+    deskripsi: string
     perlu_bukti_pendukung: string
     bantuan_sosial_id: number
 }
@@ -58,6 +61,7 @@ export default class Criteria {
         public urutan: number,
         public perlu_bukti_pendukung: string,
         public tipe: string,
+        public deskripsi: string,
         public bantuan_sosial_id: {
             id: number
             nama_bantuan: string
@@ -92,6 +96,7 @@ export default class Criteria {
             apiData.urutan,
             apiData.perlu_bukti_pendukung,
             apiData.tipe,
+            apiData.deskripsi,
             {
                 id : apiData.bantuan_sosial_id.id,
                 nama_bantuan : apiData.bantuan_sosial_id.nama_bantuan,
@@ -123,6 +128,7 @@ export default class Criteria {
             nama_kriteria: kriteria.nama_kriteria,
             kode_kriteria: kriteria.kode_kriteria,
             tipe: kriteria.tipe,
+            deskripsi: kriteria.deskripsi,
             perlu_bukti_pendukung: kriteria.perlu_bukti_pendukung,
             bantuan_sosial_id: kriteria.bantuan_sosial_id,            
         }

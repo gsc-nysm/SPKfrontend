@@ -55,13 +55,9 @@ export const criteriaService = {
         }
     },
 
-    async updateBobot(id: number, formData: FormData): Promise<AxiosResponse<IncomingApiData>> {
+    async updateBobot(id: number, data: any): Promise<AxiosResponse<IncomingApiData>> {
         try {
-            const response = await axiosInstance.post(`/v1/kriteria-bantuan/update-bobot/${id}?_method=PUT`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            })
+            const response = await axiosInstance.post(`/v1/kriteria-bantuan/update-bobot/${id}?_method=PUT`, data)
             return response
         } catch (error) {
             throw error instanceof Error ? error : new Error('Gagal memperbarui kriteria bantuan.')
