@@ -14,7 +14,7 @@
                     <el-menu-item index="3">Testimonial</el-menu-item>
                     <el-menu-item index="4">Kontak</el-menu-item>
                     <el-menu-item index="5">
-                        <el-button type="primary" @click="handleLogin" :icon="User" round>{{ isLoggedIn ?
+                        <el-button type="primary" @click="handleLogin" round>{{ isLoggedIn ?
                             'Dashboard' : 'Masuk' }}</el-button>
                     </el-menu-item>
                 </el-menu>
