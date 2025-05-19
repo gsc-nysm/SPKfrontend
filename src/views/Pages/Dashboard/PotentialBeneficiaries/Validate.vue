@@ -1,64 +1,60 @@
 <template>
     <el-card shadow="never" class="mb-4" style="border:none">
         <el-descriptions title="Data Pengajuan" :column="2" border>
-            <el-descriptions-item label="Nama Lengkap">{{potential_beneficiaries?.data.nama_lengkap}}</el-descriptions-item>
-            <el-descriptions-item label="NIK">{{potential_beneficiaries?.data.nik}}</el-descriptions-item>            
-            <el-descriptions-item label="Alamat">{{potential_beneficiaries?.data.alamat}}</el-descriptions-item>
-            <el-descriptions-item label="Desil">{{potential_beneficiaries?.data.desil }}</el-descriptions-item>            
-            <el-descriptions-item label="Jenis Kelamin">{{potential_beneficiaries?.data.jenis_kelamin }}</el-descriptions-item>            
-            <el-descriptions-item label="Bantuan diterima">{{potential_beneficiaries?.data.bantuan_diterima }}</el-descriptions-item>            
+            <el-descriptions-item label="Nama Lengkap">{{ potential_beneficiaries?.data.nama_lengkap
+            }}</el-descriptions-item>
+            <el-descriptions-item label="NIK">{{ potential_beneficiaries?.data.nik }}</el-descriptions-item>
+            <el-descriptions-item label="Alamat">{{ potential_beneficiaries?.data.alamat }}</el-descriptions-item>
+            <el-descriptions-item label="Desil">{{ potential_beneficiaries?.data.desil }}</el-descriptions-item>
+            <el-descriptions-item label="Jenis Kelamin">{{ potential_beneficiaries?.data.jenis_kelamin
+                }}</el-descriptions-item>
+            <el-descriptions-item label="Bantuan diterima">{{ potential_beneficiaries?.data.bantuan_diterima
+                }}</el-descriptions-item>
         </el-descriptions>
     </el-card>
     <el-card shadow="never" style="border:none">
         <div class="mb-4 flex lg:flex-row md:flex-row gap-4 flex-col justify-between items-center">
-            <div class="w-full lg:w-1/2 md:w-1/2">                
-                <h1 class="text-xl font-semibold">Verifikasi Calon Penerima Bantuan</h1>        
+            <div class="w-full lg:w-1/2 md:w-1/2">
+                <h1 class="text-xl font-semibold">Verifikasi Calon Penerima Bantuan</h1>
             </div>
         </div>
         <el-card shadow="never" class="mb-4 bg-gray-50" v-for="(criterion, index) in criterias" :key="index">
-            <div class="flex lg:flex-row md:flex-row gap-4 flex-col justify-between items-center" >
-                <div class="w-full lg:w-1/2 md:w-1/2">                
-                    <h1 class="text-xl font-semibold">{{criterion.nama_kriteria}}</h1>        
+            <div class="flex lg:flex-col md:flex-row gap-4 flex-col justify-between items-center">
+                <div class="w-full">
+                    <h1 class="text-xl font-semibold">{{ criterion.nama_kriteria }}</h1>
+                </div>
+                <div class="w-full">
+                    <p class="text-sm font-semibold">{{ criterion.deskripsi }}</p>
                 </div>
             </div>
             <el-radio-group v-model="answer[index]" class="my-4">
-                <el-radio v-for="option in criterion.sub_kriteria_bantuan" :key="option.id" :label="option.id" :value="option.id" size="large" border>{{option.nama_sub_kriteria}}</el-radio>                
+                <el-radio v-for="option in criterion.sub_kriteria_bantuan" :key="option.id" :label="option.id"
+                    :value="option.id" size="large" border>{{ option.nama_sub_kriteria }}</el-radio>
             </el-radio-group>
             <div class="w-full lg:w-1/3 md:w-1/2" v-if="criterion.perlu_bukti_pendukung">
                 <label for="" class="my-4 font-semibold block">Upload Bukti Pendukung</label>
-                <el-upload
-                    class="upload-demo"
-                    drag
-                    :auto-upload="false"
-                    :on-change="(file:any) => handleFileChange(file, index)"
-                    :on-remove="(file:any) => handleFileRemove(index)"
-                    accept=".pdf"
-                    :limit="1"
-                >
+                <el-upload class="upload-demo" drag :auto-upload="false"
+                    :on-change="(file: any) => handleFileChange(file, index)"
+                    :on-remove="(file: any) => handleFileRemove(index)" accept=".pdf" :limit="1">
                     <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-                        <div class="el-upload__text">
-                            Drop file here or <em>click to upload</em>
+                    <div class="el-upload__text">
+                        Drop file here or <em>click to upload</em>
+                    </div>
+                    <template #tip>
+                        <div class="el-upload__tip">
+                            PDF files only, with a size less than 5MB
                         </div>
-                        <template #tip>
-                            <div class="el-upload__tip">
-                                PDF files only, with a size less than 5MB
-                            </div>
-                        </template>
+                    </template>
                 </el-upload>
             </div>
         </el-card>
 
         <div class="flex lg:flex-row md:flex-row gap-4 flex-col justify-end items-center">
-            <el-button type="primary" @click="openSubmitDialog()" :icon="Check">Simpan</el-button>                    
+            <el-button type="primary" @click="openSubmitDialog()" :icon="Check">Simpan</el-button>
         </div>
     </el-card>
-    <el-dialog
-        v-model="dialogVisible"
-        title="Konfirmasi Penilaian"
-        width="30%"
-        :close-on-click-modal="false"
-        :before-close="closeSubmitDialog"
-    >
+    <el-dialog v-model="dialogVisible" title="Konfirmasi Penilaian" width="30%" :close-on-click-modal="false"
+        :before-close="closeSubmitDialog">
         <span class="text-center">Apakah anda yakin ingin menyimpan penilaian ini?</span>
         <template #footer>
             <el-button class="mr-4" @click="closeSubmitDialog">Batal</el-button>
@@ -99,7 +95,7 @@ const handleFileRemove = (index: number) => {
 
 const openSubmitDialog = () => {
     const allAnswered = answer.value.every((ans, idx) => ans !== undefined && ans !== null);
-    
+
     if (!allAnswered) {
         ElMessage.error('Harap isi semua kriteria sebelum menyimpan.');
         return;
@@ -113,7 +109,7 @@ const closeSubmitDialog = () => {
 
 const submitEvaluation = async () => {
     try {
-                
+
         // Siapkan payload dalam format array
         const payload = criterias.value.map((criterion: any, index: number) => {
             const data: any = {
@@ -128,10 +124,10 @@ const submitEvaluation = async () => {
 
             return data;
         });
-        
+
         // Kirim data melalui evaluationStore
         await evaluationStore.createData(payload);
-        
+
         router.push({
             name: 'manage-potential-beneficiary',
             params: {
@@ -172,6 +168,4 @@ onMounted(async () => {
 });
 </script>
 
-<style lang="scss" scoped>
-
-</style>
+<style lang="scss" scoped></style>

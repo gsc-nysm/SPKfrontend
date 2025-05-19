@@ -118,25 +118,6 @@ export const useCriteriaStore = defineStore('criterias', () => {
         try {    
                     
             const id = router.currentRoute.value.params?.id
-            // const formData = new FormData()
-            // for (const key in data) {                
-            //     if (data[key] === null) {
-            //         continue // Jika data[key] bernilai null, maka tidak akan dikirim ke database
-            //     }
-                
-            //     if (key === 'logo' && typeof data[key] === 'string') {
-            //         // Skip if logo is a string (existing file path/URL)
-            //         continue
-            //     }          
-                
-            //     if (data[key] instanceof File) {
-            //         formData.append(key, data[key]) // Tambahkan file logo baru ke formData
-            //     } else if (data[key] !== undefined) {
-            //         formData.append(key, data[key]) // Tambahkan field teks sebagai string
-            //     }
-                
-            // }            
-            // formData.append('_method', 'PUT')
             const response = await criteriaService.updateBobot(Number(id), data)
             fetchData(pagination.value?.current_page || 1)
             return response.data
