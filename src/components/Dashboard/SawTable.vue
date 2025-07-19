@@ -67,8 +67,10 @@ const criteria = computed(() => criteriaStore.criterias);
 const getMatriksValue = (matriksKeputusan, kriteriaId, valueType) => {
     if (!matriksKeputusan || !Array.isArray(matriksKeputusan)) return null;
     const matriks = matriksKeputusan.find(
-        (m) => m.kriteria_bantuan_id.id === kriteriaId
+        (m) => m.kriteria_bantuan_id.id == kriteriaId
     );
+
+
     if (matriks && matriks[valueType]) {
         return parseFloat(matriks[valueType]).toFixed(2);
     }
