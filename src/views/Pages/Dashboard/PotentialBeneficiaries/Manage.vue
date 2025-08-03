@@ -2,9 +2,9 @@
     <el-card shadow="never" class="mb-4" style="border:none">
         <el-descriptions title="Data Pengajuan" :column="2" border>
             <el-descriptions-item label="Nama Instansi">{{ submission?.data.instansi_id.nama_instansi
-            }}</el-descriptions-item>
+                }}</el-descriptions-item>
             <el-descriptions-item label="Kode Instansi">{{ submission?.data.instansi_id.kode_instansi
-            }}</el-descriptions-item>
+                }}</el-descriptions-item>
             <el-descriptions-item label="Bantuan Sosial">{{
                 submission?.data.periode_pendaftaran_id.bantuan_sosial_id.nama_bantuan_sosial }}</el-descriptions-item>
             <el-descriptions-item label="Periode Pendaftaran">{{ submission?.data.periode_pendaftaran_id.nama_periode }}
@@ -218,6 +218,7 @@ const customColumns = ref([
 
 const showFields = computed(() => [
     { prop: 'nik', label: 'NIK', type: 'text' as const, value: (data: any) => data.nik || '-' },
+    { prop: 'no_kk', label: 'No KK', type: 'text' as const, value: (data: any) => data.no_kk || '-' },
     { prop: 'nama_lengkap', label: 'Nama Lengkap', type: 'text' as const, value: (data: any) => data.nama_lengkap || '-' },
     { prop: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'text' as const, value: (data: any) => `${data.jenis_kelamin || '-'}` },
     { prop: 'alamat', label: 'Alamat', type: 'text' as const, value: (data: any) => `${data.alamat || '-'}` },

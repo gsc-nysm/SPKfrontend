@@ -46,7 +46,7 @@ export const useSubmissionStore = defineStore('submissions', () => {
                 page, 
                 per_page, 
                 search, 
-                instansi, 
+                instansi_id, 
                 periode_pendaftaran_id,
                 bantuan_sosial_id,
                 status

@@ -22,6 +22,19 @@ export const beneficiaryService = {
             throw error instanceof Error ? error : new Error('Gagal mengambil data kriteria bantuan.')
         }
     },
+
+    async search(nik: string): Promise<AxiosResponse<IncomingApiData>> {
+        try {
+            const response = await axiosInstance.post('/v1/penerima-bantuan/cari', { nik }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            return response
+        } catch (error) {
+            throw error instanceof Error ? error : new Error('Gagal mencari calon penerima bantuan.')
+        }
+    },
     async create(data:any): Promise<AxiosResponse<IncomingApiData>> {
         try {
             const response = await axiosInstance.post('/v1/penerima-bantuan', data)

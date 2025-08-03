@@ -1,28 +1,33 @@
 <template>
-    <el-menu :collapse="isCollapse" router @select="handleSelect" style="border-right: none;">
+    <el-menu :collapse="isCollapse" :default-active="activeIndex" style="border-right: none;">
         <div class="logo p-6 flex justify-center">
             <a href="/" target="_blank" rel="noopener noreferrer">
                 <img src="../../assets/Logo.png" width="100px" alt="">
             </a>
         </div>
+
         <template v-if="auth?.role?.name === 'admin'">
-            <el-menu-item :index="menu.title" v-for="menu in menu_admin" :key="menu.title" :route="menu.route">
+            <el-menu-item :index="menu.route" v-for="menu in menu_admin" :key="menu.title" @click="handleSelect(menu)">
                 <el-icon>
                     <component :is="menu.icon" />
                 </el-icon>
                 <template #title>{{ menu.title }}</template>
             </el-menu-item>
         </template>
+
         <template v-else-if="auth?.role?.name === 'verifikator'">
-            <el-menu-item :index="menu.title" v-for="menu in menu_verifikator" :key="menu.title">
+            <el-menu-item :index="generateRoute(menu)" v-for="menu in menu_verifikator" :key="menu.title"
+                @click="handleSelect(menu)">
                 <el-icon>
                     <component :is="menu.icon" />
                 </el-icon>
                 <template #title>{{ menu.title }}</template>
             </el-menu-item>
         </template>
+
         <template v-else-if="auth?.role?.name === 'validator'">
-            <el-menu-item :index="menu.title" v-for="menu in menu_validator" :key="menu.title" :route="menu.route">
+            <el-menu-item :index="menu.route" v-for="menu in menu_validator" :key="menu.title"
+                @click="handleSelect(menu)">
                 <el-icon>
                     <component :is="menu.icon" />
                 </el-icon>
@@ -34,34 +39,26 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineProps, onMounted, ref, watch } from 'vue';
+import { computed, defineProps, ref, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import type { IncomingUser } from '@/models/User';
 import { useRoute, useRouter } from 'vue-router';
-import { useSocialAssistanceStore } from '@/stores/social_assistance';
+import { ElMessage } from 'element-plus'; // Impor ElMessage untuk notifikasi
 
 const store = useAuthStore();
-const socialAssistanceStore = useSocialAssistanceStore();
 const auth = computed<IncomingUser | null>(() => store.user);
 
-
-// Props agar bisa collapse saat di sidebar
 defineProps({
     isCollapse: Boolean,
 });
 
-// Router dan Route
 const router = useRouter();
 const route = useRoute();
 
-// State untuk menu aktif
-const activeIndex = ref<string>('Dashboard');
+const social_assistance_id = computed(() => route.params.id || null);
 
-// State untuk program bantuan yang dipilih
-const social_assistance_selected = computed(() => {
-    const id = Number(route.params.id);
-    return socialAssistanceStore.social_assistances.find((assistance: any) => assistance.id === id) || null;
-});
+// State untuk menu aktif, sekarang di-set berdasarkan path
+const activeIndex = ref<string>(route.path);
 
 const menu_admin = [
     {
@@ -108,9 +105,19 @@ const menu_verifikator = [
         route: (id: string | number) => `/social-assistance/${id}/manage-beneficiary`,
     },
     {
+        icon: 'List',
+        title: 'Cari Penerima Bantuan',
+        route: `/search-beneficiary`,
+    },
+    {
+        icon: 'List',
+        title: 'Kelola Berita',
+        route: `/news`,
+    },
+    {
         icon: 'Setting',
         title: 'Pengaturan',
-        route: (id: string | number) => `/setting/profile`,
+        route: `/setting/profile`,
     },
 ]
 
@@ -147,49 +154,47 @@ const menu_validator = [
     },
 ]
 
-// Fungsi untuk menangani seleksi menu
-const handleSelect = (index: string) => {
-    const menu = menu_admin.find((m) => m.title === index) || menu_verifikator.find((m) => m.title === index);
-    if (menu) {
-        if (typeof menu.route === 'function') {
-            // Untuk rute dinamis, gunakan id dari social_assistance_selected
-            if (social_assistance_selected.value) {
-                const id = social_assistance_selected.value.id;
-                router.push(menu.route(id));
-            } else if (auth.value?.role?.name === 'verifikator') {
-                // Jika tidak ada social_assistance_selected.value, arahkan ke halaman dashboard untuk memilih kembali bantuan sosialnya
-                router.push('/dashboard');
-            }
-            // const id = social_assistance_selected.value?.id || '1'; // Default ke '1' jika belum ada
-            // router.push(menu.route(id));
+// Fungsi baru untuk menghasilkan route path dinamis (jika ada) untuk 'index'
+const generateRoute = (menu: any) => {
+    if (typeof menu.route === 'function') {
+        // Jika id ada, buat path lengkap. Jika tidak, kembalikan null atau placeholder.
+        return social_assistance_id.value ? menu.route(social_assistance_id.value) : `#${menu.title}`;
+    }
+    return menu.route;
+};
+
+
+// Fungsi handleSelect yang telah diperbaiki
+const handleSelect = (menu: { title: string, route: string | Function }) => {
+    let pathToGo: string;
+
+    if (typeof menu.route === 'function') {
+        // Logika untuk route yang butuh ID
+        if (social_assistance_id.value) {
+            pathToGo = menu.route(social_assistance_id.value);
         } else {
-            // Untuk rute statis
-            router.push(menu.route);
+            // Jika ID tidak ada, beri peringatan dan alihkan ke dashboard
+            ElMessage({
+                message: 'Silakan pilih program bantuan sosial terlebih dahulu.',
+                type: 'warning',
+            });
+            router.push('/dashboard');
+            return; // Hentikan eksekusi lebih lanjut
         }
-        activeIndex.value = index; // Perbarui activeIndex
+    } else {
+        // Logika untuk route statis
+        pathToGo = menu.route as string;
+    }
+
+    // Hanya navigasi jika path tujuan tidak sama dengan path saat ini
+    if (route.path !== pathToGo) {
+        router.push(pathToGo);
     }
 };
 
-// Perbarui activeIndex berdasarkan rute saat ini
-const updateActiveIndex = () => {
-    const path = route.path;
-    const menu = menu_admin.find((m) => m.route === path) || menu_verifikator.find((m) => {
-        if (typeof m.route === 'function') {
-            const id = route.params.id;
-            return id && m.route(String(id)) === path;
-        }
-        return m.route === path;
-    });
-    activeIndex.value = menu ? menu.title : 'Dashboard';
-};
-
 // Watch perubahan rute untuk memperbarui activeIndex
-watch(() => route.path, () => {
-    updateActiveIndex();
-});
+watch(() => route.path, (newPath) => {
+    activeIndex.value = newPath;
+}, { immediate: true }); // 'immediate: true' akan menjalankan watcher saat komponen dimuat
 
-// Inisialisasi activeIndex saat komponen dimount
-onMounted(() => {
-    updateActiveIndex();
-});
 </script>

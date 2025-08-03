@@ -26,9 +26,13 @@
                     :disabled="!(props.data && props.data.length)">
                     Mulai Perbandingan Ulang
                 </el-button>
-                <el-button plain type="primary" @click="handleUpdateBobot"
+                <el-button plain class="mr-2" type="primary" @click="handleUpdateBobot"
                     v-if="weights.length && isComparisonComplete">
                     Perbarui Bobot {{ tipe }}
+                </el-button>
+                <el-button plain type="primary" @click="handlePrintDocument"
+                    v-if="weights.length && isComparisonComplete">
+                    Dokumen {{ tipe }}
                 </el-button>
             </div>
 
@@ -107,7 +111,25 @@
     </el-dialog>
 
     <el-dialog v-model="confirmUpdateVisible" :title="`Konfirmasi Perbarui Bobot ${tipe}`" width="400" append-to-body>
-        <p>Apakah Anda yakin ingin memperbarui bobot {{ tipe }} ? Data sebelumnya akan dihapus.</p>
+        <div class="flex justify-center items-center flex-col">
+            <div class="flex justify-center">
+                <el-upload ref="uploadRef" action="#" :auto-upload="false" :on-change="handleFileChange" :limit="1"
+                    :on-exceed="handleFileExceed">
+                    <template #trigger>
+                        <el-button type="primary">Unggah Bukti Dokumen</el-button>
+                    </template>
+                    <template #tip>
+                        <div class="el-upload__tip text-center">
+                            File .pdf, .jpg, atau .png dengan ukuran maks 5MB. Wajib diisi. Dokumen ini adalah bukti
+                            bahwa kriteria telah disetujui oleh atasan.
+                        </div>
+                    </template>
+                </el-upload>
+            </div>
+            <p class="text-center mt-4">Apakah Anda yakin ingin memperbarui bobot {{ tipe }} ? Data sebelumnya akan
+                dihapus.
+            </p>
+        </div>
         <template #footer>
             <span class="dialog-footer">
                 <el-button class="mr-2" @click="confirmUpdateVisible = false">Batal</el-button>
@@ -124,6 +146,14 @@ import { ref, watch, computed } from 'vue';
 import { defineProps, defineEmits } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
+import type { UploadInstance, UploadProps, UploadRawFile } from 'element-plus';
+import { genFileId } from 'element-plus';
+import { useLogWeightingStore } from '@/stores/log_weighting';
+import { useAHP } from '@/composables/useAHP'
+import jsPDF from 'jspdf';
+import { autoTable } from 'jspdf-autotable'
+
+const logWeightingStore = useLogWeightingStore();
 
 const props = defineProps<{
     visible: boolean;
@@ -145,7 +175,7 @@ const currentPairIndex = ref(0);
 const currentScore = ref<number | null>(null);
 const criteria = ref<any[]>([]);
 const matrix = ref<any[][]>([]);
-const weights = ref<number[]>([]);
+const { weights, consistencyIndex, calculateWeights } = useAHP(matrix);
 // const ahpScale = [1, 1 / 3, 1 / 5, 1 / 7, 1 / 9, 3, 5, 7, 9];
 const ahpScale = [
     {
@@ -194,17 +224,6 @@ const confirmResetVisible = ref(false); // State untuk dialog konfirmasi
 const confirmUpdateVisible = ref(false); // State untuk dialog konfirmasi
 const isComparisonComplete = ref(false); // State untuk cek kelengkapan data
 
-const consistencyIndex = ref<{
-    lambdaMax: string | null;
-    ci: string | null;
-    cr: string | null; // Tambahkan CR
-    isConsistent: boolean | undefined; // Tambahkan status konsistensi
-}>({
-    lambdaMax: null,
-    ci: null,
-    cr: null, // Inisialisasi CR
-    isConsistent: undefined, // Inisialisasi status konsistensi
-});
 
 // Cek apakah data perbandingan sudah lengkap
 const checkComparisonCompleteness = () => {
@@ -261,6 +280,40 @@ const handleStartComparison = () => {
     } else {
         startComparison(); // Langsung mulai jika data belum lengkap
     }
+};
+
+const handlePrintDocument = () => {
+    const doc = new jsPDF();
+    const socialAssistanceName = props.data && props.data.length > 0
+        ? props.data[0].bantuan_sosial_id?.nama_bantuan
+        : ''; // Ambil dari props atau state
+    const today = new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    // Judul
+    doc.setFontSize(16);
+    doc.text('BERITA ACARA PERSETUJUAN PEMBOBOTAN', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+    doc.setFontSize(12);
+    doc.text(`Program Bantuan: ${socialAssistanceName}`, doc.internal.pageSize.getWidth() / 2, 28, { align: 'center' });
+
+    // Tabel Hasil Bobot
+    autoTable(doc, {
+        startY: 40,
+        head: [['Kriteria', 'Bobot']],
+        body: criteria.value.map((criterion, index) => [
+            criterion.nama_kriteria ?? criterion.nama_sub_kriteria,
+            `${weights.value[index].toFixed(4)} (${(weights.value[index] * 100).toFixed(2)}%)`
+        ]),
+    });
+
+    // TTD
+    const finalY = (doc as any).lastAutoTable.finalY;
+    doc.text(`Gorontalo, ${today}`, 150, finalY + 20);
+    doc.text('Mengetahui,', 150, finalY + 30);
+    doc.text('Pimpinan', 150, finalY + 37);
+    doc.text('(_________________)', 150, finalY + 67);
+
+    // Simpan PDF
+    doc.save(`Persetujuan Bobot - ${socialAssistanceName}.pdf`);
 };
 
 const handleUpdateBobot = () => {
@@ -373,64 +426,45 @@ const saveComparison = () => {
 };
 
 
+const uploadRef = ref<UploadInstance>();
+const fileToUpload = ref<UploadRawFile | null>(null);
 
-// Fungsi untuk menghitung Consistency Index
-const calculateConsistencyIndex = (): {
-    lambdaMax: string;
-    ci: string;
-    cr: string;
-    isConsistent: boolean;
-} | null => {
-    if (!matrix.value.length || !weights.value.length || matrix.value.length !== weights.value.length) {
-        return null;
-    }
+// Fungsi ini akan terpanggil setiap kali pengguna memilih atau mengubah file
+const handleFileChange: UploadProps['onChange'] = (uploadFile) => {
+    fileToUpload.value = uploadFile.raw ?? null;
+};
 
-    const n = matrix.value.length;
-    const numericMatrix = matrix.value.map(row =>
-        row.map(value => (typeof value === 'number' ? value : 1))
-    );
-
-    // Hitung vektor hasil perkalian matriks dengan bobot
-    const weightedSumVector = new Array(n).fill(0);
-    for (let i = 0; i < n; i++) {
-        for (let j = 0; j < n; j++) {
-            weightedSumVector[i] += numericMatrix[i][j] * weights.value[j];
-        }
-    }
-
-    // Normalisasi weightedSumVector untuk mendapatkan lambdaMax yang lebih akurat
-    const normalizedWeights = weights.value.reduce((sum, w) => sum + w, 0);
-    const lambdaMax = weightedSumVector.reduce((sum, value, index) => {
-        return sum + (value / (normalizedWeights * weights.value[index]));
-    }, 0) / n; // Perbaikan logika lambdaMax
-
-    // Hitung Consistency Index
-    const ci = (lambdaMax - n) / (n - 1);
-
-    // Hitung Consistency Ratio
-    const riValues = [0, 0, 0.58, 0.90, 1.12, 1.24, 1.32, 1.41, 1.45, 1.49];
-    const ri = n <= riValues.length ? riValues[n] : 1.49;
-    const cr = ci !== 0 && ri !== 0 ? ci / ri : 0;
-    const isConsistent = cr < 0.1;
-
-    return {
-        lambdaMax: lambdaMax.toFixed(4),
-        ci: ci.toFixed(4),
-        cr: cr.toFixed(4),
-        isConsistent: isConsistent,
-    };
+// Fungsi untuk menangani jika pengguna memilih lebih dari 1 file (mengganti file lama)
+const handleFileExceed: UploadProps['onExceed'] = (files) => {
+    uploadRef.value!.clearFiles();
+    const file = files[0] as UploadRawFile;
+    file.uid = genFileId();
+    uploadRef.value!.handleStart(file);
 };
 
 // Konfirmasi update bobot
 const confirmUpdate = async () => {
+    if (!fileToUpload.value) {
+        ElMessage.error('Silakan unggah dokumen bukti persetujuan terlebih dahulu.');
+        return; // Hentikan proses jika file tidak ada
+    }
+
     if (props.updateService) {
         loading.value = true;
         try {
+
+            const logFormData = new FormData();
+            logFormData.append('bantuan_sosial_id', router.currentRoute.value.params?.id as string);
+            logFormData.append('bukti_dokumen', fileToUpload.value);
+            console.log('File yang diunggah:', logFormData.get('bukti_dokumen'));
+
             // Buat objek yang memetakan kriteria_id ke bobot
             const updatedWeights: { [key: number]: number } = {};
             criteria.value.forEach((criterion, index) => {
                 updatedWeights[criterion.id] = Number(weights.value[index].toFixed(3));
             });
+
+            await logWeightingStore.createData(logFormData);
 
             // Panggil updateService dengan payload yang mencakup bantuan_id dan weights
             await props.updateService({
@@ -438,8 +472,10 @@ const confirmUpdate = async () => {
             });
 
             visible.value = false;
-
             confirmUpdateVisible.value = false;
+            fileToUpload.value = null;
+            uploadRef.value?.clearFiles();
+
         } catch (error) {
             console.error('Gagal mereset data:', error);
             ElMessage.error('Gagal mereset data perbandingan.');
@@ -535,54 +571,8 @@ const finishComparison = async () => {
     } else {
         step.value = 'table';
     }
-
-    // Hitung CI, CR, dan status konsistensi
-    const ciResult = calculateConsistencyIndex();
-    consistencyIndex.value = ciResult || {
-        lambdaMax: null,
-        ci: null,
-        cr: null,
-        isConsistent: undefined,
-    };
 };
 
-// Hitung bobot berdasarkan matriks
-const calculateWeights = () => {
-    if (!matrix.value.length || !matrix.value[0]) {
-        weights.value = [];
-        return;
-    }
-
-    // Konversi string ke number untuk perhitungan
-    const numericMatrix = matrix.value.map(row =>
-        row.map(value => (typeof value === 'number' ? value : 1)) // Ganti '-' dengan 1 jika belum ada data
-    );
-
-    // Hitung total kolom
-    const columnSums = numericMatrix[0].map((_, colIndex) =>
-        numericMatrix.reduce((sum, row) => sum + row[colIndex], 0)
-    );
-
-    // Normalisasi matriks
-    const normalizedMatrix = numericMatrix.map(row =>
-        row.map((value, colIndex) => value / columnSums[colIndex])
-    );
-
-    // Hitung bobot (rata-rata baris)
-    weights.value = normalizedMatrix.map(row =>
-        row.reduce((sum, value) => sum + value, 0) / row.length
-    );
-
-    // Hitung CI, CR, dan status konsistensi
-    const ciResult = calculateConsistencyIndex();
-    consistencyIndex.value = ciResult || {
-        lambdaMax: null,
-        ci: null,
-        cr: null,
-        isConsistent: undefined,
-    };
-
-};
 
 const handleClose = (done: () => void) => {
     visible.value = false;

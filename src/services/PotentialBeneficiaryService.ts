@@ -50,6 +50,19 @@ export const potentialBeneficiaryService = {
             throw error instanceof Error ? error : new Error('Gagal membuat calon penerima bantuan.')
         }
     },
+
+    async search(nik: string): Promise<AxiosResponse<IncomingApiData>> {
+        try {
+            const response = await axiosInstance.post('/v1/calon-penerima/cari', { nik }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            return response
+        } catch (error) {
+            throw error instanceof Error ? error : new Error('Gagal mencari calon penerima bantuan.')
+        }
+    },
     async calculateTopsis(formData: FormData): Promise<AxiosResponse<IncomingApiData>> {
         try {
             console.log(formData);

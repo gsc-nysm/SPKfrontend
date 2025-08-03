@@ -10,6 +10,7 @@ import axiosInstance from '@/utils/axios'
 export const usePotentialBeneficiaryStore = defineStore('potential_beneficiaries', () => {
     const potential_beneficiaries = ref<IncomingApiData[]>([])
     const potential_beneficiaries_ranked = ref<IncomingApiData[]>([])
+    const search_results = ref<any | null>(null)
     const pagination = ref<any | null>(null)
     const loading = ref<boolean>(false)
     const error = ref<string | null>(null)
@@ -66,6 +67,31 @@ export const usePotentialBeneficiaryStore = defineStore('potential_beneficiaries
             
         } catch (err:any) {
             error.value = err.message || 'Terjadi kesalahan saat mengambil data calon penerima bantuan.'
+        } finally {
+            loading.value = false
+        }
+    }
+
+    const search = async (nik: string) => {
+        loading.value = true
+        error.value = null
+        try {
+            // Memanggil service
+            const response = await potentialBeneficiaryService.search(nik)
+            const data = response.data;
+
+            if (!data) {
+                // Jika tidak ada data (null atau undefined), set sebagai array kosong
+                search_results.value = [];
+            } else {
+                // Jika ada data, cek apakah itu sudah array. Jika bukan, bungkus menjadi array.
+                search_results.value = Array.isArray(data) ? data : data;
+            }
+        } catch (err: any) {
+            const errorMessage = err.response?.data?.message || err.message || 'Terjadi kesalahan saat mencari calon penerima.'
+            error.value = errorMessage
+            // Lempar error lagi agar bisa ditangkap di komponen
+            throw new Error(errorMessage)
         } finally {
             loading.value = false
         }
@@ -254,6 +280,7 @@ export const usePotentialBeneficiaryStore = defineStore('potential_beneficiaries
     }
 
     return {
+        search_results,
         potential_beneficiaries,
         potential_beneficiaries_ranked,
         pagination,
@@ -263,6 +290,7 @@ export const usePotentialBeneficiaryStore = defineStore('potential_beneficiaries
         filterQuery,
         columns,
         fetchData,
+        search,
         calculateTopsis,
         fetchRanking,
         createData,

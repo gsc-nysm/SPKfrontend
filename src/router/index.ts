@@ -31,6 +31,7 @@ import Beneficiary from '@/views/Pages/Dashboard/Beneficiary/Beneficiary.vue';
 import Validator from '@/views/Pages/Dashboard/Beneficiary/Validator.vue';
 import Profil from '@/views/Pages/Dashboard/Setting/Profil.vue';
 import Password from '@/views/Pages/Dashboard/Setting/Password.vue';
+import Search from '@/views/Pages/Dashboard/Search.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -66,6 +67,18 @@ const router = createRouter({
             ability:[] 
           },
           beforeEnter: requireAuth,
+        },
+        {
+          path:'/search-beneficiary',
+          name:'Cari Penerima Bantuan',
+          component: Search,
+          meta: { 
+            breadcrumbs: [
+              { name: 'Cari Penerima Bantuan', path: '/search-beneficiary' },
+            ], 
+            role: 'all', 
+            ability:[] 
+          },
         },
         {
           path:'/setting/profile',
