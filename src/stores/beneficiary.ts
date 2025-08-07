@@ -9,6 +9,7 @@ import axiosInstance from '@/utils/axios'
 
 export const useBeneficiaryStore = defineStore('beneficiaries', () => {
     const beneficiaries = ref<IncomingApiData[]>([])
+    const search_results = ref<any | null>(null)
     const pagination = ref<any | null>(null)
     const loading = ref<boolean>(false)
     const error = ref<string | null>(null)
@@ -70,6 +71,31 @@ export const useBeneficiaryStore = defineStore('beneficiaries', () => {
             loading.value = false
         }
     }
+
+    const search = async (nik: string) => {
+            loading.value = true
+            error.value = null
+            try {
+                // Memanggil service
+                const response = await beneficiaryService.search(nik)
+                const data = response.data;
+    
+                if (!data) {
+                    // Jika tidak ada data (null atau undefined), set sebagai array kosong
+                    search_results.value = [];
+                } else {
+                    // Jika ada data, cek apakah itu sudah array. Jika bukan, bungkus menjadi array.
+                    search_results.value = Array.isArray(data) ? data : data;
+                }
+            } catch (err: any) {
+                const errorMessage = err.response?.data?.message || err.message || 'Terjadi kesalahan saat mencari calon penerima.'
+                error.value = errorMessage
+                // Lempar error lagi agar bisa ditangkap di komponen
+                throw new Error(errorMessage)
+            } finally {
+                loading.value = false
+            }
+        }
 
     const multiCreateData = async (data: any) => {
         loading.value = true
@@ -195,6 +221,7 @@ export const useBeneficiaryStore = defineStore('beneficiaries', () => {
 
     return {
         beneficiaries,
+        search_results,
         pagination,
         loading,
         error,
@@ -202,6 +229,7 @@ export const useBeneficiaryStore = defineStore('beneficiaries', () => {
         filterQuery,
         columns,
         fetchData,
+        search,
         createData,
         multiCreateData,
         deleteMultipleData,

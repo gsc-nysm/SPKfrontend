@@ -57,7 +57,7 @@
 <script setup lang="ts">
 import Datatable from '@/components/Dashboard/Datatable.vue';
 import { Plus, ArrowRight, Close, Delete, Edit, View, User, Search } from '@element-plus/icons-vue'
-import { ref, watch, computed, defineEmits } from 'vue'
+import { ref, watch, computed, defineEmits, onMounted } from 'vue'
 import type { IncomingApiData } from '@/models/Submission'
 import { debounce } from 'lodash-es'
 import CrudModal from '@/components/Dashboard/CrudModal.vue'
@@ -183,6 +183,10 @@ const resetFilters = () => {
     statusFilter.value = ''
     tingkatanFilter.value = ''
 }
+
+onMounted(() => {
+    store.fetchData(1, 10, searchQuery.value, String(auth.user?.instansi?.id)); // Fetch data awal
+});
 
 // Watch untuk filter
 watch([searchQuery, statusFilter], () => {

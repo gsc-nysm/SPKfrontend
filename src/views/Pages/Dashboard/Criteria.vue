@@ -7,8 +7,13 @@
             <div>
                 <el-button type="primary" plain class=" md:mb-0 sm:mb-2 mb-2 w-full lg:w-fit md:w-fit"
                     @click="openWeightingModal()" :icon="Operation">Kelola Pembobotan</el-button>
+                <el-button type="primary" plain class=" md:mb-0 sm:mb-2 mb-2 w-full lg:w-fit md:w-fit"
+                    @click="showLogModal" :icon="Document">
+                    Riwayat Pembobotan
+                </el-button>
+
                 <el-button type="primary" class="w-full lg:w-fit md:w-fit" @click="openCrudModal('create', null)"
-                    :icon="Plus">Tambah</el-button>
+                    :icon="Plus">Tambah Data</el-button>
             </div>
         </div>
         <div class="my-4 flex lg:flex-row md:flex-row gap-4 justify-between items-center">
@@ -29,8 +34,9 @@
                 :customColumns="customColumns" @per-page-change="handlePerPageChange" @page-change="handlePageChange"
                 @selection-change="onSelectionChange">
                 <template #perlu_bukti_pendukung="{ row }">
-                    <el-tag :type="row.perlu_bukti_pendukung == true ? 'success' : 'danger'">{{ row.perlu_bukti_pendukung
-                        ? 'Ya' : 'Tidak'}}</el-tag>
+                    <el-tag :type="row.perlu_bukti_pendukung == true ? 'success' : 'danger'">{{
+                        row.perlu_bukti_pendukung
+                            ? 'Ya' : 'Tidak' }}</el-tag>
                 </template>
                 <template #bobot="{ row }">
                     <template v-if="row.bobot">
@@ -64,13 +70,17 @@
                 @delete="handleDelete" @close="crudModalVisible = false" />
             <Weighting v-model:visible="dialogWeightingVisible" :data="criterias" :create-service="pairWise.createData"
                 :delete-service="pairWise.deleteByBantuan" :update-service="store.updateBobot" tipe="kriteria" />
+
+            <el-dialog v-model="logModalVisible" title="Riwayat Perubahan Bobot" width="800">
+                <LogWeighting v-if="logModalVisible" :social-assistance-id="currentSocialAssistanceId" />
+            </el-dialog>
         </div>
     </el-card>
 </template>
 
 <script setup lang="ts">
 import Datatable from '@/components/Dashboard/Datatable.vue';
-import { Plus, Delete, Edit, View, List, Operation } from '@element-plus/icons-vue'
+import { Plus, Delete, Edit, View, List, Operation, Document } from '@element-plus/icons-vue'
 import { ref, watch, computed, defineEmits } from 'vue'
 import type { IncomingApiData } from '@/models/Criteria'
 import { debounce } from 'lodash-es'
@@ -79,6 +89,7 @@ import { useCriteriaStore } from '@/stores/criteria';
 import { usePairWiseStore } from '@/stores/pair_wise_comparison';
 import Weighting from '@/components/Dashboard/Weighting.vue';
 import { useRoute, useRouter } from 'vue-router';
+import LogWeighting from '@/components/Dashboard/LogWeighting.vue';
 
 const selectedRows = ref<any[]>([]) // State untuk melacak baris yang dipilih
 const searchQuery = ref<string>('')
@@ -99,6 +110,8 @@ const route = useRoute();
 const router = useRouter();
 const currentSearchQuery = ref('')
 const isInitialFetchDone = ref(false);
+const logModalVisible = ref(false);
+const currentSocialAssistanceId = router.currentRoute.value.params.id as string;
 
 // Definisikan formFields secara dinamis berdasarkan kebutuhan
 const formFields = computed(() => [
@@ -124,6 +137,10 @@ const tipeOptions = [
 
 const openWeightingModal = () => {
     dialogWeightingVisible.value = !dialogWeightingVisible.value
+}
+
+const showLogModal = () => {
+    logModalVisible.value = !logModalVisible.value
 }
 
 const openCrudModal = (mode: 'create' | 'update' | 'show' | 'delete' | 'multi-delete', data: Partial<IncomingApiData> | null) => {
